@@ -118,8 +118,9 @@
             // ------------------------------
             // ECS関連の初期化
 
-            // DefaultWorldを生かしておくと余計な副作用(GCなど)が出る可能性があるので殺しておく
-            World.Active.Dispose();
+            // メモ:
+            // DefaultWorldは生成時の負荷が高い上に使わなくても生かしておく事で余計な副作用(GCなど)が出る可能性がある。
+            // こちらは「UNITY_DISABLE_AUTOMATIC_SYSTEM_BOOTSTRAP」を定義することで自動生成を止めることが可能。
 
             // GOL専用のWorldを作成し必要なComponentSystemを登録していく
             World.Active = new World("GOL World");

@@ -524,7 +524,10 @@ PlayerSettings:
   webGLCompressionFormat: 1
   webGLLinkerTarget: 1
   webGLThreadsSupport: 0
-  scriptingDefineSymbols: {}
+  scriptingDefineSymbols:
+    1: UNITY_DISABLE_AUTOMATIC_SYSTEM_BOOTSTRAP
+    7: UNITY_DISABLE_AUTOMATIC_SYSTEM_BOOTSTRAP
+    13: UNITY_DISABLE_AUTOMATIC_SYSTEM_BOOTSTRAP
   platformArchitecture: {}
   scriptingBackend: {}
   il2cppCompilerConfiguration: {}
