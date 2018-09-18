@@ -119,8 +119,10 @@
             // ECS関連の初期化
 
             // メモ:
-            // DefaultWorldは生成時の負荷が高い上に使わなくても生かしておく事で余計な副作用(GCなど)が出る可能性がある。
-            // こちらは「UNITY_DISABLE_AUTOMATIC_SYSTEM_BOOTSTRAP」を定義することで自動生成を止めることが可能。
+            // ・DefaultWorldは生成時の負荷が高い上に使わなくても生かしておく事で余計な副作用(GCなど)が出る可能性がある。
+            // 　こちらは「UNITY_DISABLE_AUTOMATIC_SYSTEM_BOOTSTRAP」を定義することで自動生成を止めることが可能。
+            // ・PureECSで実装するならDefaultWorldを消しても特に問題はないが、HybridECSで実装される方は以下のForumの内容に注意。
+            // 　https://forum.unity.com/threads/disabling-automaticworldbootstrap-but-keeping-hybrid-injection-hooks.529675/
 
             // GOL専用のWorldを作成し必要なComponentSystemを登録していく
             World.Active = new World("GOL World");
@@ -181,7 +183,7 @@
             if (this._materialInstance != null) { Destroy(this._materialInstance); this._materialInstance = null; }
             if (this._writeMaterialbuffs != null) { this._writeMaterialbuffs.Release(); this._writeMaterialbuffs = null; }
             if (WriteMaterialData.IsCreated) { WriteMaterialData.Dispose(); }
-            if (World.Active != null) { World.Active.Dispose(); }
+            World.DisposeAllWorlds();
         }
 
         /// <summary>
