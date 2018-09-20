@@ -1,8 +1,8 @@
 # ECS-GameOfLife
 ECSでライフゲームを実装してみた
 
-- Unity2018.3.0b1
-- Entities 0.0.12-preview.13
+- Unity2018.3.0b2
+- Entities 0.0.12-preview.14
 
 Conway's Game of Life  
 ![conway](https://user-images.githubusercontent.com/17098415/45648372-5d55cc00-bb03-11e8-8614-094bdbe97063.gif)  
