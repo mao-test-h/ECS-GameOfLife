@@ -7,10 +7,11 @@
     using Unity.Collections;
     using Unity.Collections.LowLevel.Unsafe;
 
-    public class Resolution
+    [System.Serializable]
+    public struct Resolution
     {
-        public const int Width = 1920;
-        public const int Height = 1080;
+        public int Width;
+        public int Height;
     }
 
     public struct MaterialData
@@ -42,6 +43,11 @@
         #region // Private Members(Editable)
 
         /// <summary>
+        /// 解像度
+        /// </summary>
+        [SerializeField] Resolution _resolution = new Resolution { Width = 1920, Height = 1080 };
+
+        /// <summary>
         /// ライフゲーム用マテリアル
         /// </summary>
         [SerializeField] Material _material = null;
@@ -71,25 +77,15 @@
         /// </summary>
         ComputeBuffer _writeMaterialbuffs;
 
+        /// <summary>
+        /// マテリアル書き込みデータ
+        /// </summary>
+        NativeArray<MaterialData> _writeMaterialData;
+
         // Shader.PropertyToIDs
         int _widthId, _heightId, _buffId;
 
         #endregion // Private Members
-
-        // ------------------------------
-        #region // Private Members(Static)
-
-        /// <summary>
-        /// マテリアル書き込みデータ
-        /// </summary>
-        static NativeArray<MaterialData> WriteMaterialData;
-
-        /// <summary>
-        /// マテリアル書き込みデータのポインタ(Jobのデータ受け渡し用)
-        /// </summary>
-        public static void* WriteMaterialDataPrt;
-
-        #endregion // Private Members(Static)
 
 
         // ----------------------------------------------------
@@ -106,13 +102,12 @@
             this._buffId = Shader.PropertyToID("_MaterialBuff");
 
             // 最大セル数
-            this._maxCellsNum = Resolution.Width * Resolution.Height;
+            this._maxCellsNum = this._resolution.Width * this._resolution.Height;
             // マテリアル及びバッファの生成
             this._materialInstance = new Material(this._material);
             this._writeMaterialbuffs = new ComputeBuffer(this._maxCellsNum, Marshal.SizeOf(typeof(MaterialData)));
             // バッファのポインタを確保(Job側に回すやつ)
-            WriteMaterialData = new NativeArray<MaterialData>(this._maxCellsNum, Allocator.Persistent);
-            WriteMaterialDataPrt = NativeArrayUnsafeUtility.GetUnsafePtr(WriteMaterialData);
+            this._writeMaterialData = new NativeArray<MaterialData>(this._maxCellsNum, Allocator.Persistent);
 
 
             // ------------------------------
@@ -127,13 +122,15 @@
             // GOL専用のWorldを作成し必要なComponentSystemを登録していく
             World.Active = new World("GOL World");
             World.Active.CreateManager(typeof(EntityManager));
+            // ComponentSystemはCreateManager経由でコンストラクタを呼び出すことが可能。(CreateManager → Activator.CreateInstanceと呼び出されている)
+            // その際に引数も渡すことが可能。
             if (this._isConwayGameOfLife)
             {
-                World.Active.CreateManager(typeof(ConwayGOLSystem));
+                World.Active.CreateManager(typeof(ConwayGOLSystem), this._writeMaterialData, this._resolution);
             }
             else
             {
-                World.Active.CreateManager(typeof(WaveGOLSystem));
+                World.Active.CreateManager(typeof(WaveGOLSystem), this._writeMaterialData, this._resolution);
             }
             ScriptBehaviourUpdateOrder.UpdatePlayerLoop(World.Active);
 
@@ -144,8 +141,8 @@
                 : entityManager.CreateArchetype(ComponentType.Create<WaveCellData>());
             for (int i = 0; i < this._maxCellsNum; ++i)
             {
-                var x = i % Resolution.Width;
-                var y = i / Resolution.Width;
+                var x = i % this._resolution.Width;
+                var y = i / this._resolution.Width;
                 var entity = entityManager.CreateEntity(cellArcheyype);
 
                 if (this._isConwayGameOfLife)
@@ -163,7 +160,7 @@
                 {
                     // Wave Game of Life
                     int rand = Random.Range(0, 32);
-                    float nextState = (((float)x / (float)Resolution.Width) + ((float)y / (float)Resolution.Height) * rand);
+                    float nextState = (((float)x / (float)this._resolution.Width) + ((float)y / (float)this._resolution.Height) * rand);
                     entityManager.SetComponentData(entity, new WaveCellData
                     {
                         NextState = nextState,
@@ -182,7 +179,7 @@
         {
             if (this._materialInstance != null) { Destroy(this._materialInstance); this._materialInstance = null; }
             if (this._writeMaterialbuffs != null) { this._writeMaterialbuffs.Release(); this._writeMaterialbuffs = null; }
-            if (WriteMaterialData.IsCreated) { WriteMaterialData.Dispose(); }
+            if (this._writeMaterialData.IsCreated) { this._writeMaterialData.Dispose(); }
             World.DisposeAllWorlds();
         }
 
@@ -193,9 +190,9 @@
         {
             if (this._writeMaterialbuffs != null)
             {
-                this._writeMaterialbuffs.SetData(WriteMaterialData);
-                this._materialInstance.SetInt(this._widthId, Resolution.Width);
-                this._materialInstance.SetInt(this._heightId, Resolution.Height);
+                this._writeMaterialbuffs.SetData(this._writeMaterialData);
+                this._materialInstance.SetInt(this._widthId, this._resolution.Width);
+                this._materialInstance.SetInt(this._heightId, this._resolution.Height);
                 this._materialInstance.SetBuffer(this._buffId, this._writeMaterialbuffs);
                 Graphics.Blit(src, dest, this._materialInstance);
             }

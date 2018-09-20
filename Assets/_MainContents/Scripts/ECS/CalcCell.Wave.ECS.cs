@@ -19,6 +19,13 @@
         NativeArray<WaveCellData> _cells;
         void* _cellsPtr = null;
         void* _writeDataPrt = null;
+        Resolution _resolution;
+
+        public WaveGOLSystem(NativeArray<MaterialData> writeMaterialData, Resolution resolution)
+        {
+            this._writeDataPrt = NativeArrayUnsafeUtility.GetUnsafePtr(writeMaterialData);
+            this._resolution = resolution;
+        }
 
         protected override void OnCreateManager()
         {
@@ -34,14 +41,13 @@
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            if (this._writeDataPrt == null)
+            if (this._cellsPtr == null)
             {
                 this._cells = new NativeArray<WaveCellData>(this._dataGroup.CellData.Length, Allocator.Persistent);
                 this._cellsPtr = NativeArrayUnsafeUtility.GetUnsafePtr(this._cells);
-                this._writeDataPrt = GameOfLife.WriteMaterialDataPrt;
             }
             this._dataGroup.CellData.CopyTo(this._cells, 0);
-            var job = new CalcCellJob(this._cellsPtr, this._writeDataPrt);
+            var job = new CalcCellJob(this._cellsPtr, this._writeDataPrt, this._resolution);
             return job.Schedule(this, inputDeps);
         }
 
@@ -52,10 +58,10 @@
             [NativeDisableUnsafePtrRestriction] void* _cellsPrt;
             [NativeDisableUnsafePtrRestriction] void* _writeDataPrt;
 
-            public CalcCellJob(void* cellsPrt, void* writeDataPrt)
+            public CalcCellJob(void* cellsPrt, void* writeDataPrt, Resolution resolution)
             {
-                this._width = Resolution.Width;
-                this._height = Resolution.Height;
+                this._width = resolution.Width;
+                this._height = resolution.Height;
                 this._cellsPrt = cellsPrt;
                 this._writeDataPrt = writeDataPrt;
             }

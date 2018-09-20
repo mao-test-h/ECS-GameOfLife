@@ -142,6 +142,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4c2e3769f0b3194b830a6ba7b0756ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _resolution:
+    Width: 1920
+    Height: 1080
   _material: {fileID: 2100000, guid: 3a0000fe6b365e240a51de0a786f7964, type: 2}
   _isConwayGameOfLife: 1
 --- !u!20 &534669904
