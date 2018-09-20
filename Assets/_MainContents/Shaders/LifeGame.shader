@@ -24,7 +24,7 @@
                 int2 xy = int2(_Width, _Height) * i.uv;
                 Data data = _MaterialBuff[xy.y * _Width  + xy.x];
                 fixed pixel = data.state;
-                return fixed4(pixel, pixel, pixel, 1);
+                return fixed4((pixel).xxx, 1);
             }
             ENDCG
         }

@@ -106,7 +106,7 @@
             // マテリアル及びバッファの生成
             this._materialInstance = new Material(this._material);
             this._writeMaterialbuffs = new ComputeBuffer(this._maxCellsNum, Marshal.SizeOf(typeof(MaterialData)));
-            // バッファのポインタを確保(Job側に回すやつ)
+            // ECS & JobSystem側で書き込むためのバッファを確保
             this._writeMaterialData = new NativeArray<MaterialData>(this._maxCellsNum, Allocator.Persistent);
 
 
