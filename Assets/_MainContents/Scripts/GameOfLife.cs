@@ -121,7 +121,7 @@
 
             // GOL専用のWorldを作成し必要なComponentSystemを登録していく
             World.Active = new World("GOL World");
-            World.Active.CreateManager(typeof(EntityManager));
+            var entityManager = World.Active.CreateManager<EntityManager>();
             // ComponentSystemはCreateManager経由でコンストラクタを呼び出すことが可能。(CreateManager → Activator.CreateInstanceと呼び出されている)
             // その際に引数も渡すことが可能。
             if (this._isConwayGameOfLife)
@@ -135,7 +135,6 @@
             ScriptBehaviourUpdateOrder.UpdatePlayerLoop(World.Active);
 
             // セル(Entity)の生成
-            var entityManager = World.Active.GetExistingManager<EntityManager>();
             var cellArcheyype = this._isConwayGameOfLife
                 ? entityManager.CreateArchetype(ComponentType.Create<ConwayCellData>())
                 : entityManager.CreateArchetype(ComponentType.Create<WaveCellData>());
