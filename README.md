@@ -1,6 +1,8 @@
 # ECS-GameOfLife
 ECSでライフゲームを実装してみた
 
+[※解説記事はこちら](https://qiita.com/mao_/items/6fc14b36656a29e82d2b)
+
 - Unity2018.3.0b2
 - Entities 0.0.12-preview.14
 
